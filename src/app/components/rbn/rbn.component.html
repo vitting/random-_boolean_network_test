@@ -1,0 +1,75 @@
+<button (click)="justTest()" mat-raised-button color="primary">
+  Test
+</button>
+<button (click)="cancelAnimation()" mat-raised-button color="primary">
+  Stop animation
+</button>
+<div class="buttons">
+  <button (click)="displayTruthTable()" mat-raised-button color="accent">
+    {{buttonTruthTableTitle}}
+  </button>
+  <button (click)="runCalculations()" mat-raised-button color="primary">
+    Run simulation
+  </button>
+</div>
+<div class="input_form">
+  <mat-form-field appearance="fill">
+    <mat-label>Number of nodes</mat-label>
+    <mat-select [(ngModel)]="numberOfNodes">
+      <mat-option *ngFor="let value of numberOfNodesSelect" [value]="value">
+        {{value}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Number of connection nodes</mat-label>
+    <mat-select [(ngModel)]="numberOfConnectionNodes" (selectionChange)="changeConnectionNodes()">
+      <mat-option *ngFor="let value of numberOfConnectionNodesSelect" [value]="value">
+        {{value}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Dot size</mat-label>
+    <mat-select [(ngModel)]="dotSizeValue" (selectionChange)="changeDotSize()">
+      <mat-option *ngFor="let value of dotSizeSelect" [value]="value">
+        {{value}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Draw orientation</mat-label>
+    <mat-select [(ngModel)]="orientationValue" (selectionChange)="changeOrientation()">
+      <mat-option *ngFor="let value of orientationSelect" [value]="value">
+        {{value}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="truthtable" *ngIf="showTruthTable">
+  <div class="heading">Truth table ({{truthTableDisplay.length}})</div>
+  <div class="truthtable__container">
+    <div
+      class="truthtable__item"
+      *ngFor="let item of truthTableDisplay"
+      matTooltip="{{item.pattern}} = {{item.value}}"
+    >
+      <span class="truthtable__pattern">{{item.pattern}}</span
+      ><span class="truthtable__value">{{item.value}}</span>
+    </div>
+  </div>
+</div>
+<!-- <div class="result">
+  <div class="result__line" *ngFor="let line of resultNodes">
+    <div
+      *ngFor="let item of line"
+      [ngClass]="{'result_true': item !== '0', 'result_false': item === '0'}"
+      class="result_true"
+    ></div>
+  </div>
+</div> -->
+<div class="container" style=""></div>

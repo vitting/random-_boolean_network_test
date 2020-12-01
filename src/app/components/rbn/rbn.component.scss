@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+.heading {
+  font-weight: 500;
+}
+
+.buttons {
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+
+  button:first-child {
+    margin-right: 10px;
+  }
+}
+
+.input_form {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 840px;
+}
+
+.truthtable__container {
+  display: flex;
+  flex-wrap: wrap;
+
+
+  .truthtable__item {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9em;
+    margin: 0 2px 0 0;
+    color: white;
+
+    .truthtable__pattern {
+      border-radius: 4px 0 0 4px;
+      padding: 0 2px;
+      background-color: #c53867;
+    }
+
+    .truthtable__value {
+      border-radius: 0 4px 4px 0;
+      padding: 0 2px;
+      background-color: #a8335a;
+    }
+  }
+
+  .truthtable__item:hover {
+    cursor: default;
+    .truthtable__pattern {
+      background-color: #5e464e;
+    }
+
+    .truthtable__value {
+      background-color: #92767e;
+    }
+  }
+}
+
+.result {
+  display: flex;
+  .result__line {
+    display: flex;
+    flex-direction: column;
+    .result_true, .result_false {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+
+    .result_true {
+      background-color: #0000FF;
+    }
+
+    .result_false {
+      background-color: #FFFF00;
+    }
+  }
+}
