@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { RbnNode } from "src/app/models/rbnNode";
 import Konva from "konva";
 import { NgZone } from "@angular/core";
@@ -34,10 +34,27 @@ export class RbnComponent implements OnInit {
   animationId = 0;
   layer = new Konva.Layer();
   circleTemp = new Konva.Circle();
-
+  @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
+  private ctx!: CanvasRenderingContext2D | null;
   constructor(private ngZone: NgZone) {}
 
   ngOnInit(): void {
+    const width =
+      this.orientation === "h"
+        ? this.numberOfNodes * this.drawSize
+        : window.innerWidth;
+    const height =
+      this.orientation === "h"
+        ? window.innerHeight - 200
+        : this.numberOfNodes * this.drawSize;
+
+    this.canvas.nativeElement.width = width;
+    this.canvas.nativeElement.height = height;
+    this.ctx = this.canvas.nativeElement.getContext("2d", {
+      alpha: true,
+    });
+    console.log(this.ctx);
+
     this.generateTruthTable(this.numberOfConnectionNodes);
   }
 
@@ -187,13 +204,14 @@ export class RbnComponent implements OnInit {
     this.resultNodes = [];
     this.initMainNodes(this.numberOfNodes);
     this.initAssignConnectionNodes();
-    const stage = this.initDisplayNodeValues();
+    // const stage = this.initDisplayNodeValues();
 
-    // this.ngZone.runOutsideAngular(() => this.runApplication(stage));
-    this.runApplication(stage);
+    this.ngZone.runOutsideAngular(() => this.runApplication());
+    // this.runApplication(stage);
+    // this.runApplication();
   }
 
-  runApplication(stage: Konva.Stage): void {
+  runApplication(): void {
     this.setConnectionNodePattern();
     this.setMainNodesValuesFromConnectionNodes();
 
@@ -205,15 +223,17 @@ export class RbnComponent implements OnInit {
     this.resultNodes.push(arr);
     this.displayNodeValues();
 
-    this.animationId = requestAnimationFrame(
-      this.runApplication.bind(this, stage)
-    );
+    this.animationId = requestAnimationFrame(this.runApplication.bind(this));
   }
 
   cancelAnimation(): void {
     cancelAnimationFrame(this.animationId);
-    console.log(this.layer.find("Circle"));
+    // console.log(this.layer.find("Circle"));
+    // for (const node of this.layer.find("Circle")) {
+    //   node.destroy();
+    // }
 
+    // this.layer.draw();
   }
 
   displayTruthTable(): void {
@@ -232,7 +252,7 @@ export class RbnComponent implements OnInit {
     }
   }
 
-  private initDisplayNodeValues(): Konva.Stage {
+  private initDisplayNodeValues(): void {
     const width =
       this.orientation === "h"
         ? this.numberOfNodes * this.drawSize
@@ -241,43 +261,120 @@ export class RbnComponent implements OnInit {
       this.orientation === "h"
         ? window.innerHeight - 200
         : this.numberOfNodes * this.drawSize;
-
-    const stage = new Konva.Stage({
-      container: ".container",
-      width,
-      height,
-    });
-
-    this.circleTemp = new Konva.Circle({
-      radius: this.drawSize / 2,
-    });
-    this.circleTemp.cache();
-    this.circleTemp.listening(false);
-    this.layer.destroy();
-    this.layer = new Konva.Layer();
-    this.layer.listening(false);
-    stage.add(this.layer);
-
-    return stage;
   }
 
   displayNodeValues(): void {
-    const currentNodeArr = this.resultNodes[this.resultNodes.length - 1];
-    let y = (this.resultNodes.length * this.drawSize) + (this.drawSize / 2);
+    let y = this.drawSize / 2;
 
-    let x = this.drawSize / 2;
-
-    for (const item of currentNodeArr) {
-      const circle = this.circleTemp.clone({
-        x: this.orientation === "h" ? x : y,
-        y: this.orientation === "h" ? y : x,
-        fill: item === "0" ? "#0000FF" : "#FFFF00",
-      });
-
-      this.layer.add(circle);
-      circle.draw();
-      x += this.drawSize;
+    if (this.ctx) {
+      this.ctx.clearRect(
+        0,
+        0,
+        this.canvas.nativeElement.width,
+        this.canvas.nativeElement.height
+      );
     }
-    y += this.drawSize;
+
+    for (const nodes of this.resultNodes) {
+      let x = this.drawSize / 2;
+
+      for (const item of nodes) {
+        if (this.ctx) {
+          this.ctx.beginPath();
+
+          this.ctx.arc(
+            this.orientation === "h" ? x : y,
+            this.orientation === "h" ? y : x,
+            this.drawSize / 2,
+            0,
+            Math.PI * 2
+          );
+          this.ctx.fillStyle = item === "0" ? "#0000FF" : "#FFFF00";
+          this.ctx.lineWidth = 0;
+          this.ctx.fill();
+        }
+
+        x += this.drawSize;
+      }
+     
+      y += this.drawSize;
+    }
   }
+
+  // runApplication(stage: Konva.Stage): void {
+  //   this.setConnectionNodePattern();
+  //   this.setMainNodesValuesFromConnectionNodes();
+
+  //   const arr: string[] = [];
+  //   for (const node of this.nodes) {
+  //     arr.push(node.value.toString());
+  //   }
+
+  //   this.resultNodes.push(arr);
+  //   this.displayNodeValues(stage);
+
+  //   this.animationId = requestAnimationFrame(
+  //     this.runApplication.bind(this, stage)
+  //   );
+  // }
+
+  // private initDisplayNodeValues(): Konva.Stage {
+  //   const width =
+  //     this.orientation === "h"
+  //       ? this.numberOfNodes * this.drawSize
+  //       : window.innerWidth;
+  //   const height =
+  //     this.orientation === "h"
+  //       ? window.innerHeight - 200
+  //       : this.numberOfNodes * this.drawSize;
+
+  //   const stage = new Konva.Stage({
+  //     container: ".container",
+  //     width,
+  //     height,
+  //   });
+
+  //   this.circleTemp = new Konva.Circle({
+  //     radius: this.drawSize / 2,
+  //   });
+  //   this.circleTemp.cache();
+  //   this.circleTemp.listening(false);
+  //   this.layer.destroy();
+  //   this.layer = new Konva.Layer();
+  //   this.layer.listening(false);
+  //   stage.add(this.layer);
+
+  //   return stage;
+  // }
+
+  // displayNodeValues(stage: Konva.Stage): void {
+  //   if (this.layer.find("Circle").length > 5000) {
+  //     this.layer.destroy();
+  //     this.layer = new Konva.Layer();
+  //     stage.add(this.layer);
+  //     // for (let index = 0; index < 100; index++) {
+  //     //   const node = this.layer.find("Circle")[index];
+  //     //   node.destroy();
+  //     // }
+
+  //     // this.layer.draw();
+  //   }
+  //   const currentNodeArr = this.resultNodes[this.resultNodes.length - 1];
+  //   let y = (this.resultNodes.length * this.drawSize) + (this.drawSize / 2);
+
+  //   let x = this.drawSize / 2;
+
+  //   for (const item of currentNodeArr) {
+  //     const circle = this.circleTemp.clone({
+  //       x: this.orientation === "h" ? x : y,
+  //       y: this.orientation === "h" ? y : x,
+  //       fill: item === "0" ? "#0000FF" : "#FFFF00",
+  //     });
+
+  //     this.layer.add(circle);
+  //     circle.draw();
+  //     x += this.drawSize;
+  //   }
+  //   y += this.drawSize;
+  // }
 }
