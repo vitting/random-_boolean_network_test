@@ -12,6 +12,8 @@ interface TruthTableDisplay {
   styleUrls: ["./rbn.component.scss"],
 })
 export class RbnComponent implements OnInit {
+  controlsActive = true;
+  numberOfNodesCalculated = 0;
   numberOfNodesSelect = [20, 50, 100, 200, 400, 500, 600, 700, 800, 900, 1000];
   numberOfConnectionNodesSelect = [3, 4, 5, 6, 7, 8, 9, 10];
   orientationSelect = ["horizontal", "vertical"];
@@ -31,8 +33,7 @@ export class RbnComponent implements OnInit {
   orientation = "h"; // h, v
   animationId = 0;
   @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
-  private fpsThrottle = 1000 / 30;
-  private lastDrawTime = -1;
+  private startDrawingAt = 0;
   private ctx!: CanvasRenderingContext2D | null;
 
   constructor() {}
@@ -193,15 +194,19 @@ export class RbnComponent implements OnInit {
   }
 
   private runApplication(): void {
+    this.controlsActive = false;
     this.setConnectionNodePattern();
     this.setMainNodesValuesFromConnectionNodes();
 
     const arr: string[] = [];
+
     for (const node of this.nodes) {
       arr.push(node.value.toString());
     }
 
     this.resultNodes.push(arr);
+    this.numberOfNodesCalculated = this.resultNodes.length * this.numberOfNodes;
+
     this.displayNodeValues();
 
     this.animationId = requestAnimationFrame(this.runApplication.bind(this));
@@ -219,6 +224,7 @@ export class RbnComponent implements OnInit {
   // Cancel current calculation
   cancelAnimation(): void {
     cancelAnimationFrame(this.animationId);
+    this.controlsActive = true;
   }
 
   // Print current truth table
@@ -239,8 +245,6 @@ export class RbnComponent implements OnInit {
   }
 
   displayNodeValues(): void {
-    console.log("RUNNING DRAWING");
-
     let y = this.drawSize / 2;
 
     if (this.ctx) {
@@ -251,10 +255,16 @@ export class RbnComponent implements OnInit {
         this.canvas.nativeElement.height
       );
     }
-
-    for (const nodes of this.resultNodes) {
+    for (
+      let index = this.startDrawingAt;
+      index < this.resultNodes.length;
+      index++
+    ) {
+      const nodes = this.resultNodes[index];
       let x = this.drawSize / 2;
-
+      if (y > this.canvas.nativeElement.height) {
+        this.startDrawingAt = index;
+      }
       for (const item of nodes) {
         if (this.ctx) {
           this.ctx.beginPath();
@@ -276,5 +286,34 @@ export class RbnComponent implements OnInit {
 
       y += this.drawSize;
     }
+
+    // for (const nodes of this.resultNodes) {
+    //   let x = this.drawSize / 2;
+
+    //   if (y > this.canvas.nativeElement.height) {
+    //     console.log("STØRRE", y, this.canvas.nativeElement.height);
+    //   }
+
+    //   for (const item of nodes) {
+    //     if (this.ctx) {
+    //       this.ctx.beginPath();
+
+    //       this.ctx.arc(
+    //         this.orientation === "h" ? x : y,
+    //         this.orientation === "h" ? y : x,
+    //         this.drawSize / 2,
+    //         0,
+    //         Math.PI * 2
+    //       );
+    //       this.ctx.fillStyle = item === "0" ? "#0000FF" : "#FFFF00";
+    //       this.ctx.lineWidth = 0;
+    //       this.ctx.fill();
+    //     }
+
+    //     x += this.drawSize;
+    //   }
+
+    //   y += this.drawSize;
+    // }
   }
 }

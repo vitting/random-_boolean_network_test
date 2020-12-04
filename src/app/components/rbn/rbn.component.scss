@@ -9,8 +9,12 @@
   display: flex;
   justify-content: flex-end;
 
-  button:first-child {
+  button {
     margin-right: 10px;
+
+    &:last-child {
+      margin-right: 0;
+    }
   }
 }
 
@@ -41,18 +45,18 @@
     .truthtable__value {
       border-radius: 0 4px 4px 0;
       padding: 0 2px;
-      background-color: #a8335a;
+      background-color: #2b29a7;
     }
   }
 
   .truthtable__item:hover {
     cursor: default;
     .truthtable__pattern {
-      background-color: #5e464e;
+      background-color: #58162c;
     }
 
     .truthtable__value {
-      background-color: #92767e;
+      background-color: #100f55;
     }
   }
 }

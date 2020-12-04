@@ -1,18 +1,18 @@
 <div class="buttons">
-  <button (click)="displayTruthTable()" mat-raised-button color="accent">
+  <button (click)="displayTruthTable()" mat-raised-button color="accent" [disabled]="!controlsActive">
     {{buttonTruthTableTitle}}
   </button>
-  <button (click)="runCalculations()" mat-raised-button color="primary">
+  <button (click)="runCalculations()" mat-raised-button color="primary" [disabled]="!controlsActive">
     Run simulation
   </button>
-  <button (click)="cancelAnimation()" mat-raised-button color="primary">
+  <button (click)="cancelAnimation()" mat-raised-button color="primary" [disabled]="controlsActive">
     Stop animation
   </button>
 </div>
 <div class="input_form">
   <mat-form-field appearance="fill">
     <mat-label>Number of nodes</mat-label>
-    <mat-select [(ngModel)]="numberOfNodes">
+    <mat-select [(ngModel)]="numberOfNodes" [disabled]="!controlsActive">
       <mat-option *ngFor="let value of numberOfNodesSelect" [value]="value">
         {{value}}
       </mat-option>
@@ -21,7 +21,7 @@
 
   <mat-form-field appearance="fill">
     <mat-label>Number of connection nodes</mat-label>
-    <mat-select [(ngModel)]="numberOfConnectionNodes" (selectionChange)="changeConnectionNodes()">
+    <mat-select [(ngModel)]="numberOfConnectionNodes" (selectionChange)="changeConnectionNodes()" [disabled]="!controlsActive">
       <mat-option *ngFor="let value of numberOfConnectionNodesSelect" [value]="value">
         {{value}}
       </mat-option>
@@ -30,7 +30,7 @@
 
   <mat-form-field appearance="fill">
     <mat-label>Dot size</mat-label>
-    <mat-select [(ngModel)]="dotSizeValue" (selectionChange)="changeDotSize()">
+    <mat-select [(ngModel)]="dotSizeValue" (selectionChange)="changeDotSize()" [disabled]="!controlsActive">
       <mat-option *ngFor="let value of dotSizeSelect" [value]="value">
         {{value}}
       </mat-option>
@@ -39,7 +39,7 @@
 
   <mat-form-field appearance="fill">
     <mat-label>Draw orientation</mat-label>
-    <mat-select [(ngModel)]="orientationValue" (selectionChange)="changeOrientation()">
+    <mat-select [(ngModel)]="orientationValue" (selectionChange)="changeOrientation()" [disabled]="!controlsActive">
       <mat-option *ngFor="let value of orientationSelect" [value]="value">
         {{value}}
       </mat-option>
@@ -60,14 +60,8 @@
     </div>
   </div>
 </div>
-<!-- <div class="result">
-  <div class="result__line" *ngFor="let line of resultNodes">
-    <div
-      *ngFor="let item of line"
-      [ngClass]="{'result_true': item !== '0', 'result_false': item === '0'}"
-      class="result_true"
-    ></div>
-  </div>
-</div> -->
-<div class="container"></div>
+<div class="counter" *ngIf="numberOfNodesCalculated">
+  Number of nodes calculated: {{numberOfNodesCalculated}}
+</div>
+
 <canvas #canvas width="200" height="200" style="border:1px solid black;background-color: #fff;"></canvas>
