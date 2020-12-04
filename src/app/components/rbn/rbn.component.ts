@@ -177,7 +177,20 @@ export class RbnComponent implements OnInit {
     }
   }
 
-  private changeCanvasSize(): void {}
+  private changeCanvasSize(): void {
+    const width =
+      this.orientation === "h"
+        ? this.numberOfNodes * this.drawSize
+        : window.innerWidth - 10;
+    const height =
+      this.orientation === "h"
+        ? window.innerHeight - 200
+        : this.numberOfNodes * this.drawSize;
+
+    this.canvas.nativeElement.width = width;
+    this.canvas.nativeElement.height = height;
+    this.ctx = this.canvas.nativeElement.getContext("2d");
+  }
 
   private runApplication(): void {
     this.setConnectionNodePattern();
@@ -195,19 +208,7 @@ export class RbnComponent implements OnInit {
   }
 
   runCalculations(): void {
-    const width =
-      this.orientation === "h"
-        ? this.numberOfNodes * this.drawSize
-        : window.innerWidth - 10;
-    const height =
-      this.orientation === "h"
-        ? window.innerHeight - 200
-        : this.numberOfNodes * this.drawSize;
-
-    this.canvas.nativeElement.width = width;
-    this.canvas.nativeElement.height = height;
-    this.ctx = this.canvas.nativeElement.getContext("2d");
-
+    this.changeCanvasSize();
     this.nodes = [];
     this.resultNodes = [];
     this.initMainNodes(this.numberOfNodes);
