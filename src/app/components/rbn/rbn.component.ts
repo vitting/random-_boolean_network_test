@@ -1,7 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { RbnNode } from "src/app/models/rbnNode";
-import Konva from "konva";
-import { NgZone } from "@angular/core";
 
 interface TruthTableDisplay {
   pattern: string;
@@ -32,35 +30,15 @@ export class RbnComponent implements OnInit {
   drawSize = 6; // 4, 6, 10
   orientation = "h"; // h, v
   animationId = 0;
-  layer = new Konva.Layer();
-  circleTemp = new Konva.Circle();
   @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
+  private fpsThrottle = 1000 / 30;
+  private lastDrawTime = -1;
   private ctx!: CanvasRenderingContext2D | null;
-  constructor(private ngZone: NgZone) {}
+
+  constructor() {}
 
   ngOnInit(): void {
-    const width =
-      this.orientation === "h"
-        ? this.numberOfNodes * this.drawSize
-        : window.innerWidth;
-    const height =
-      this.orientation === "h"
-        ? window.innerHeight - 200
-        : this.numberOfNodes * this.drawSize;
-
-    this.canvas.nativeElement.width = width;
-    this.canvas.nativeElement.height = height;
-    this.ctx = this.canvas.nativeElement.getContext("2d", {
-      alpha: true,
-    });
-    console.log(this.ctx);
-
     this.generateTruthTable(this.numberOfConnectionNodes);
-  }
-
-  justTest(): void {
-    console.log(this.numberOfNodes);
-    console.log(this.numberOfConnectionNodes);
   }
 
   // Generate truth table
@@ -199,19 +177,9 @@ export class RbnComponent implements OnInit {
     }
   }
 
-  runCalculations(): void {
-    this.nodes = [];
-    this.resultNodes = [];
-    this.initMainNodes(this.numberOfNodes);
-    this.initAssignConnectionNodes();
-    // const stage = this.initDisplayNodeValues();
+  private changeCanvasSize(): void {}
 
-    this.ngZone.runOutsideAngular(() => this.runApplication());
-    // this.runApplication(stage);
-    // this.runApplication();
-  }
-
-  runApplication(): void {
+  private runApplication(): void {
     this.setConnectionNodePattern();
     this.setMainNodesValuesFromConnectionNodes();
 
@@ -226,16 +194,33 @@ export class RbnComponent implements OnInit {
     this.animationId = requestAnimationFrame(this.runApplication.bind(this));
   }
 
-  cancelAnimation(): void {
-    cancelAnimationFrame(this.animationId);
-    // console.log(this.layer.find("Circle"));
-    // for (const node of this.layer.find("Circle")) {
-    //   node.destroy();
-    // }
+  runCalculations(): void {
+    const width =
+      this.orientation === "h"
+        ? this.numberOfNodes * this.drawSize
+        : window.innerWidth - 10;
+    const height =
+      this.orientation === "h"
+        ? window.innerHeight - 200
+        : this.numberOfNodes * this.drawSize;
 
-    // this.layer.draw();
+    this.canvas.nativeElement.width = width;
+    this.canvas.nativeElement.height = height;
+    this.ctx = this.canvas.nativeElement.getContext("2d");
+
+    this.nodes = [];
+    this.resultNodes = [];
+    this.initMainNodes(this.numberOfNodes);
+    this.initAssignConnectionNodes();
+    this.runApplication();
   }
 
+  // Cancel current calculation
+  cancelAnimation(): void {
+    cancelAnimationFrame(this.animationId);
+  }
+
+  // Print current truth table
   displayTruthTable(): void {
     this.truthTableDisplay = [];
 
@@ -252,18 +237,9 @@ export class RbnComponent implements OnInit {
     }
   }
 
-  private initDisplayNodeValues(): void {
-    const width =
-      this.orientation === "h"
-        ? this.numberOfNodes * this.drawSize
-        : window.innerWidth;
-    const height =
-      this.orientation === "h"
-        ? window.innerHeight - 200
-        : this.numberOfNodes * this.drawSize;
-  }
-
   displayNodeValues(): void {
+    console.log("RUNNING DRAWING");
+
     let y = this.drawSize / 2;
 
     if (this.ctx) {
@@ -296,85 +272,8 @@ export class RbnComponent implements OnInit {
 
         x += this.drawSize;
       }
-     
+
       y += this.drawSize;
     }
   }
-
-  // runApplication(stage: Konva.Stage): void {
-  //   this.setConnectionNodePattern();
-  //   this.setMainNodesValuesFromConnectionNodes();
-
-  //   const arr: string[] = [];
-  //   for (const node of this.nodes) {
-  //     arr.push(node.value.toString());
-  //   }
-
-  //   this.resultNodes.push(arr);
-  //   this.displayNodeValues(stage);
-
-  //   this.animationId = requestAnimationFrame(
-  //     this.runApplication.bind(this, stage)
-  //   );
-  // }
-
-  // private initDisplayNodeValues(): Konva.Stage {
-  //   const width =
-  //     this.orientation === "h"
-  //       ? this.numberOfNodes * this.drawSize
-  //       : window.innerWidth;
-  //   const height =
-  //     this.orientation === "h"
-  //       ? window.innerHeight - 200
-  //       : this.numberOfNodes * this.drawSize;
-
-  //   const stage = new Konva.Stage({
-  //     container: ".container",
-  //     width,
-  //     height,
-  //   });
-
-  //   this.circleTemp = new Konva.Circle({
-  //     radius: this.drawSize / 2,
-  //   });
-  //   this.circleTemp.cache();
-  //   this.circleTemp.listening(false);
-  //   this.layer.destroy();
-  //   this.layer = new Konva.Layer();
-  //   this.layer.listening(false);
-  //   stage.add(this.layer);
-
-  //   return stage;
-  // }
-
-  // displayNodeValues(stage: Konva.Stage): void {
-  //   if (this.layer.find("Circle").length > 5000) {
-  //     this.layer.destroy();
-  //     this.layer = new Konva.Layer();
-  //     stage.add(this.layer);
-  //     // for (let index = 0; index < 100; index++) {
-  //     //   const node = this.layer.find("Circle")[index];
-  //     //   node.destroy();
-  //     // }
-
-  //     // this.layer.draw();
-  //   }
-  //   const currentNodeArr = this.resultNodes[this.resultNodes.length - 1];
-  //   let y = (this.resultNodes.length * this.drawSize) + (this.drawSize / 2);
-
-  //   let x = this.drawSize / 2;
-
-  //   for (const item of currentNodeArr) {
-  //     const circle = this.circleTemp.clone({
-  //       x: this.orientation === "h" ? x : y,
-  //       y: this.orientation === "h" ? y : x,
-  //       fill: item === "0" ? "#0000FF" : "#FFFF00",
-  //     });
-
-  //     this.layer.add(circle);
-  //     circle.draw();
-  //     x += this.drawSize;
-  //   }
-  //   y += this.drawSize;
-  // }
 }
